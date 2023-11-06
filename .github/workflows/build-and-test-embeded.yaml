@@ -28,6 +28,9 @@ jobs:
       - name: Build PlatformIO Project
         run: pio run -e embeded_env
 
+      - name: move firmware extention elf to root
+        run: mv .pio/build/embeded_env/firmware.elf firmware.elf
+
       - name: Test Embeded
         uses: wokwi/wokwi-ci-action@v1
         with:
@@ -35,4 +38,6 @@ jobs:
           timeout: 180000
           fail_text: FAILED
           scenario: 'senario.test.yaml'
-          
+
+      - name: delete firmware.elf
+        run: rm firmware.elf
