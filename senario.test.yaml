@@ -1,0 +1,6 @@
+name: Senario Test
+version: 1
+author: Ronny Antoon
+
+steps:
+  - wait-serial: '-----------------------------------Finished all tests!-----------------------------------'

@@ -1,0 +1,1 @@
+### myboard.json file is for platformio partitions

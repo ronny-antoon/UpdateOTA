@@ -1,0 +1,24 @@
+{
+    "name": "UpdateOTA",
+    "version": "1.0.0",
+    "description": "The \"UpdateOTA\" library is a C++ library for ESP32 devices that provides a convenient way to download and perform updates on firmware and SPIFFS partitions.",
+    "keywords": "UpdateOTA, OTA,over the air, update http, updater,arduino ota,firmware update,upload spiffs, ESP32, ronny, antoon, MetaHouse",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ronny-antoon/UpdateOTA.git"
+    },
+    "authors": [
+        {
+            "name": "Ronny Antoon",
+            "email": "ronnyantoon@gmail.com",
+            "url": "https://github.com/ronny-antoon"
+        }
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/ronny-antoon/UpdateOTA",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "examples": [
+        "examples/*/*.ino"
+    ]
+}

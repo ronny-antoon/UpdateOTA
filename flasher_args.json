@@ -1,0 +1,24 @@
+{
+    "write_flash_args" : [ "--flash_mode", "dio",
+                           "--flash_size", "16MB",
+                           "--flash_freq", "40m" ],
+    "flash_settings" : {
+        "flash_mode": "dio",
+        "flash_size": "16MB",
+        "flash_freq": "40m"
+    },
+    "flash_files" : {
+        "0x1000" : ".pio/build/embeded_env/bootloader.bin",
+        "0x10000" : ".pio/build/embeded_env/firmware.bin",
+        "0x8000" : ".pio/build/embeded_env/partitions.bin"
+    },
+    "bootloader" : { "offset" : "0x1000", "file" : ".pio/build/embeded_env/bootloader.bin", "encrypted" : "false" },
+    "app" : { "offset" : "0x10000", "file" : ".pio/build/embeded_env/firmware.bin", "encrypted" : "false" },
+    "partition-table" : { "offset" : "0x8000", "file" : ".pio/build/embeded_env/partitions.bin", "encrypted" : "false" },
+    "extra_esptool_args" : {
+        "after"  : "hard_reset",
+        "before" : "default_reset",
+        "stub"   : true,
+        "chip"   : "esp32"
+    }
+}
