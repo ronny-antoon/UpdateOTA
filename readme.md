@@ -35,7 +35,6 @@ This library is designed to be flexible and extensible, providing you with the a
 
 The UpdateOTA Library has the following dependencies:
 - MultiPrinterLogger @ 3.1.1
-- googletest @ 1.12.1
 - HTTPClient @ 2.0.0
 - WiFi @ 2.0.0
 - WiFiClientSecure @ 2.0.0
