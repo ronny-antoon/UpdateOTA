@@ -1,0 +1,28 @@
+name: Update Latest Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  update-latest-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Remove "latest" release
+        run: |
+          latest_release_id=$(gh release list --json id --limit 1 --repo ${{ github.repository }} | jq -r '.[0].id')
+          gh release delete $latest_release_id --yes --repo ${{ github.repository }}
+
+      - name: Create new "latest" release
+        run: |
+          gh release create latest ./* --notes "Release notes for latest version" --repo ${{ github.repository }}
