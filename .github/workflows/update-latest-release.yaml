@@ -7,11 +7,12 @@ on:
 jobs:
   update-latest-release:
     runs-on: ubuntu-latest
-    if: github.event.release.tag_name != 'latest'
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Git
         run: |
@@ -20,16 +21,14 @@ jobs:
 
       - name: Remove "latest" release
         env:
-          GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Set the GH_TOKEN environment variable
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          latest_release_id=$(gh release list | grep "latest" | awk '{print $1}')
-          if [ -n "$latest_release_id" ]; then
-            gh release delete $latest_release_id --yes
-          fi
+          git tag -d latest
+          git push origin :refs/tags/latest
 
       - name: Create new "latest" release
         env:
-          GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Set the GH_TOKEN environment variable
-      
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          gh release create latest --notes "Release notes for latest version" --target $(git rev-parse HEAD)
+          git tag latest
+          git push origin latest
