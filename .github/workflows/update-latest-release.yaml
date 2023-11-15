@@ -4,11 +4,11 @@ on:
   release:
     types:
       - published
-
 jobs:
   update-latest-release:
     runs-on: ubuntu-latest
-
+    if: github.event.release.tag_name != 'latest'
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
