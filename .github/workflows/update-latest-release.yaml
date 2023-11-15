@@ -32,4 +32,4 @@ jobs:
           GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Set the GH_TOKEN environment variable
       
         run: |
-          gh release create latest ./* --notes "Release notes for latest version" --repo ${{ github.repository }}
+          gh release create latest --notes "Release notes for latest version" --repo ${{ github.repository }}
