@@ -1,31 +1,35 @@
 name: Update Latest Tag
-
 on:
   workflow_dispatch:
   release:
     types:
       - created
-
 jobs:
   update-latest-tag:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check if release tag is not 'latest'
-      run: |
-        if [[ "${{ github.event.release.tag_name }}" != 'latest' ]]; then
-          echo "Release tag is not 'latest'."
-        else
-          echo "Release tag is 'latest'. Exiting workflow."
-          exit 78
-        fi
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
 
-    - name: Remove existing 'latest' tag
-      run: |
-        git tag -d latest || true
-        git push origin :refs/tags/latest || true
+      - name: Set up Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
-    - name: Create new 'latest' tag
-      run: |
-        git tag latest
-        git push origin latest
+      - name: Remove "latest" release
+        run: |
+          if git rev-parse refs/tags/latest >/dev/null 2>&1; then
+            git tag -d latest
+            git push origin :refs/tags/latest
+          else
+            echo "Tag 'latest' does not exist, skipping deletion."
+          fi
+
+      - name: Create new "latest" release
+        run: |
+          git tag latest
+          git push origin latest
