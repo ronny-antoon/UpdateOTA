@@ -34,4 +34,5 @@ jobs:
           GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Set the GH_TOKEN environment variable
 
         run: |
-          gh tag create latest --notes "tag notes for latest version" --target $(git rev-parse HEAD)
+          gh repo create-tag <tag_name> <commit_sha> -m "Tag description"
+
