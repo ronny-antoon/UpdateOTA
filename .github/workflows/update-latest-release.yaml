@@ -1,5 +1,6 @@
 name: Update Latest Release
-
+env:
+          GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  # Set the GH_TOKEN environment variable
 on:
   workflow_dispatch:
   release:
@@ -21,11 +22,11 @@ jobs:
 
       - name: Remove "latest" release
         run: |
-          latest_release_id=$(gh release list | grep "latest" | awk '{print $1}')
+          latest_release_id=$(gh GH_TOKEN release list | grep "latest" | awk '{print $1}')
           if [ -n "$latest_release_id" ]; then
-            gh release delete $latest_release_id --yes
+            gh GH_TOKEN release delete $latest_release_id --yes
           fi
 
       - name: Create new "latest" release
         run: |
-          gh release create latest ./* --notes "Release notes for latest version" --repo ${{ github.repository }}
+          gh GH_TOKEN release create latest ./* --notes "Release notes for latest version" --repo ${{ github.repository }}
