@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   release:
     types:
-      - published
+      - created
 jobs:
   update-latest-release:
     runs-on: ubuntu-latest
@@ -32,4 +32,4 @@ jobs:
           GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Set the GH_TOKEN environment variable
       
         run: |
-          gh release create latest --notes "Release notes for latest version" --repo ${{ github.repository }} --target $(git rev-parse HEAD)
+          gh release create latest --notes "Release notes for latest version" --target $(git rev-parse HEAD)
