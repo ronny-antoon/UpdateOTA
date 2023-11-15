@@ -23,8 +23,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          git tag -d latest
-          git push origin :refs/tags/latest
+          if git rev-parse refs/tags/latest >/dev/null 2>&1; then
+            git tag -d latest
+            git push origin :refs/tags/latest
+          else
+            echo "Tag 'latest' does not exist, skipping deletion."
+          fi
 
       - name: Create new "latest" release
         env:
