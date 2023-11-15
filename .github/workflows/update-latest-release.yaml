@@ -21,7 +21,7 @@ jobs:
 
       - name: Remove "latest" release
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git rev-parse refs/tags/latest >/dev/null 2>&1; then
             git tag -d latest
@@ -32,7 +32,7 @@ jobs:
 
       - name: Create new "latest" release
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git tag latest
           git push origin latest
