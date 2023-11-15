@@ -11,13 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt-get update
-          sudo apt-get install gh
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -28,8 +21,10 @@ jobs:
 
       - name: Remove "latest" release
         run: |
-          latest_release_id=$(gh release list --json id --limit 1 --repo ${{ github.repository }} | jq -r '.[0].id')
-          gh release delete $latest_release_id --yes --repo ${{ github.repository }}
+          latest_release_id=$(gh release list | grep "latest" | awk '{print $1}')
+          if [ -n "$latest_release_id" ]; then
+            gh release delete $latest_release_id --yes
+          fi
 
       - name: Create new "latest" release
         run: |
