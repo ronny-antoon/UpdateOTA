@@ -78,7 +78,7 @@ TEST_F(getVersionTest, OK)
     EXPECT_EQ(DOWNLOADER_ERROR::OK, downloader->setCA(CA_CERT));
     EXPECT_EQ(DOWNLOADER_ERROR::OK, downloader->setURLForVersion(urlvirsion));
     EXPECT_EQ(DOWNLOADER_ERROR::OK, downloader->getVersion(version, 10));
-    EXPECT_STREQ("1.5.3", version);
+    EXPECT_STREQ("5.1.1", version);
 }
 
 TEST_F(getVersionTest, SERVER_ERROR)
