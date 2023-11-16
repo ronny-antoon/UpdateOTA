@@ -8,16 +8,22 @@
 class setURLForVersionTest : public ::testing::Test
 {
 protected:
+    uint32_t _startFreeHeap;
     Downloader *downloader;
     const char *urlvirsion = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA/main/examples/version.txt";
     void SetUp() override
     {
+        delay(10);
+        _startFreeHeap = ESP.getFreeHeap();
         downloader = new Downloader();
     }
 
     void TearDown() override
     {
         delete downloader;
+        delay(10);
+        if (ESP.getFreeHeap() != _startFreeHeap)
+            FAIL() << "Memory leak of " << _startFreeHeap - ESP.getFreeHeap() << " bytes"; // Fail the test if there is a memory leak
     }
 };
 
