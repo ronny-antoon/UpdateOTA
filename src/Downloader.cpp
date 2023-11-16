@@ -3,11 +3,10 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Stream.h>
-#include <API_MultiPrinterLogger.hpp>
 
 #include "Downloader.hpp"
 
-Downloader::Downloader()
+Downloader::Downloader(MultiPrinterLoggerInterface *logger)
 {
     // Initialize default values for the Downloader class.
     _timeOut = 8000;              // Default timeout value in milliseconds.
@@ -17,6 +16,7 @@ Downloader::Downloader()
     _wifiClient = nullptr;        // Initialize WiFi client pointer to nullptr.
     _httpClient = nullptr;        // Initialize HTTP client pointer to nullptr.
     _streamSize = 0;              // Initialize stream size to zero.
+    _logger = logger;             // Initialize logger.
 }
 
 Downloader::~Downloader()
@@ -41,14 +41,14 @@ Downloader::~Downloader()
 
 DOWNLOADER_ERROR Downloader::download()
 {
-    int downloadTimer = millis();       // Record the start time of the download.
-    Log_Debug(TAG, "Download started"); // Log a debug message.
+    int downloadTimer = millis();           // Record the start time of the download.
+    Log_Debug(_logger, "Download started"); // Log a debug message.
 
     // Check if the URL for the binary file is empty.
     if (strlen(_uRLForBinFile) == 0)
     {
-        Log_Error(TAG, "URL for bin file is empty"); // Log an error message.
-        return DOWNLOADER_ERROR::NO_URL_PROVIDED;    // Return an error indicating no URL provided.
+        Log_Error(_logger, "URL for bin file is empty"); // Log an error message.
+        return DOWNLOADER_ERROR::NO_URL_PROVIDED;        // Return an error indicating no URL provided.
     }
 
     CreateWifiClient(); // Create a WiFi client based on the CA certificate, if available.
@@ -60,19 +60,19 @@ DOWNLOADER_ERROR Downloader::download()
     int httpCode = _httpClient->GET(); // Send an HTTP GET request.
     if (httpCode != HTTP_CODE_OK)
     {
-        Log_Error(TAG, "HTTP GET failed, error: %s", _httpClient->errorToString(httpCode).c_str());
+        Log_Error(_logger, "HTTP GET failed, error: %s", _httpClient->errorToString(httpCode).c_str());
         return DOWNLOADER_ERROR::SERVER_ERROR; // Return an unknown error if the HTTP GET request fails.
     }
 
     _streamSize = _httpClient->getSize(); // Get the size of the downloaded stream.
     if (_streamSize <= 0)
     {
-        Log_Error(TAG, "Server returned invalid Content-Length header");
+        Log_Error(_logger, "Server returned invalid Content-Length header");
         return DOWNLOADER_ERROR::DOWNLOAD_FAILED; // Return an error indicating a download failure.
     }
 
     // Log a debug message with the download statistics.
-    Log_Debug(TAG, "Download finished, %d bytes, %.2f seconds", _streamSize, (double)(millis() - downloadTimer) / 1000);
+    Log_Debug(_logger, "Download finished, %d bytes, %.2f seconds", _streamSize, (double)(millis() - downloadTimer) / 1000);
     return DOWNLOADER_ERROR::OK; // Return success.
 }
 
@@ -80,14 +80,14 @@ DOWNLOADER_ERROR Downloader::getVersion(char *versionDis, int maxLen)
 {
     if (versionDis == nullptr)
     {
-        Log_Error(TAG, "Version is null");         // Log an error if the version buffer is null.
+        Log_Error(_logger, "Version is null");     // Log an error if the version buffer is null.
         return DOWNLOADER_ERROR::INVALID_ARGUMENT; // Return an error indicating an invalid argument.
     }
 
     if (maxLen <= 0)
     {
-        Log_Error(TAG, "Version length is invalid"); // Log an error if the version buffer is null.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;   // Return an error indicating an invalid argument.
+        Log_Error(_logger, "Version length is invalid"); // Log an error if the version buffer is null.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;       // Return an error indicating an invalid argument.
     }
 
     for (int i = 0; i < maxLen; i++)
@@ -96,8 +96,8 @@ DOWNLOADER_ERROR Downloader::getVersion(char *versionDis, int maxLen)
     // Check if the URL for the version file is empty.
     if (strlen(_uRLForVersionFile) == 0)
     {
-        Log_Error(TAG, "URL for version file is empty"); // Log an error message.
-        return DOWNLOADER_ERROR::NO_URL_PROVIDED;        // Return an error indicating no URL provided.
+        Log_Error(_logger, "URL for version file is empty"); // Log an error message.
+        return DOWNLOADER_ERROR::NO_URL_PROVIDED;            // Return an error indicating no URL provided.
     }
 
     CreateWifiClient(); // Create a WiFi client based on the CA certificate, if available.
@@ -109,14 +109,14 @@ DOWNLOADER_ERROR Downloader::getVersion(char *versionDis, int maxLen)
     int httpCode = _httpClient->GET(); // Send an HTTP GET request.
     if (httpCode != HTTP_CODE_OK)
     {
-        Log_Error(TAG, "HTTP GET failed, error code: %d - error string: %s", httpCode, _httpClient->errorToString(httpCode).c_str());
+        Log_Error(_logger, "HTTP GET failed, error code: %d - error string: %s", httpCode, _httpClient->errorToString(httpCode).c_str());
         return DOWNLOADER_ERROR::SERVER_ERROR; // Return an unknown error if the HTTP GET request fails.
     }
 
     _streamSize = _httpClient->getSize(); // Get the size of the downloaded stream.
     if (_streamSize <= 0)
     {
-        Log_Error(TAG, "Server returned invalid Content-Length header");
+        Log_Error(_logger, "Server returned invalid Content-Length header");
         return DOWNLOADER_ERROR::DOWNLOAD_FAILED; // Return an error indicating a download failure.
     }
 
@@ -124,12 +124,12 @@ DOWNLOADER_ERROR Downloader::getVersion(char *versionDis, int maxLen)
 
     if (strlen(versionDis) == 0)
     {
-        Log_Error(TAG, "Version is empty");
+        Log_Error(_logger, "Version is empty");
         return DOWNLOADER_ERROR::DOWNLOAD_FAILED; // Return an error indicating a download failure.
     }
 
     // Log the retrieved version information.
-    Log_Debug(TAG, "Version: %s", versionDis);
+    Log_Debug(_logger, "Version: %s", versionDis);
 
     return DOWNLOADER_ERROR::OK; // Return success.
 }
@@ -138,8 +138,8 @@ DOWNLOADER_ERROR Downloader::setCA(const char *cACertificate)
 {
     if (cACertificate == nullptr || strlen(cACertificate) >= CA_MAX_LENGTH)
     {
-        Log_Error(TAG, "CA Certificate is null");  // Log an error if the CA certificate is null or too long.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT; // Return an error indicating an invalid argument.
+        Log_Error(_logger, "CA Certificate is null"); // Log an error if the CA certificate is null or too long.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;    // Return an error indicating an invalid argument.
     }
 
     size_t caLength = strlen(cACertificate) < CA_MAX_LENGTH ? strlen(cACertificate) : CA_MAX_LENGTH;
@@ -147,11 +147,11 @@ DOWNLOADER_ERROR Downloader::setCA(const char *cACertificate)
 
     if (strlen(_cACertificate) == 0)
     {
-        Log_Error(TAG, "CA Certificate is empty"); // Log an error if the CA certificate is empty.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT; // Return an error indicating an invalid argument.
+        Log_Error(_logger, "CA Certificate is empty"); // Log an error if the CA certificate is empty.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;     // Return an error indicating an invalid argument.
     }
 
-    Log_Debug(TAG, "CA Certificate Registered"); // Log a debug message.
+    Log_Debug(_logger, "CA Certificate Registered"); // Log a debug message.
 
     return DOWNLOADER_ERROR::OK; // Return success.
 }
@@ -160,8 +160,8 @@ DOWNLOADER_ERROR Downloader::setURLForBin(const char *uRLForBinFile)
 {
     if (uRLForBinFile == nullptr)
     {
-        Log_Error(TAG, "URL for bin file is null"); // Log an error if the URL for the binary file is null.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;  // Return an error indicating an invalid argument.
+        Log_Error(_logger, "URL for bin file is null"); // Log an error if the URL for the binary file is null.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;      // Return an error indicating an invalid argument.
     }
 
     size_t urlLength = strlen(uRLForBinFile) < URL_MAX_LENGTH ? strlen(uRLForBinFile) : URL_MAX_LENGTH;
@@ -170,11 +170,11 @@ DOWNLOADER_ERROR Downloader::setURLForBin(const char *uRLForBinFile)
 
     if (strlen(_uRLForBinFile) == 0)
     {
-        Log_Error(TAG, "URL for bin file is empty"); // Log an error if the URL for the binary file is empty.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;   // Return an error indicating an invalid argument.
+        Log_Error(_logger, "URL for bin file is empty"); // Log an error if the URL for the binary file is empty.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;       // Return an error indicating an invalid argument.
     }
 
-    Log_Debug(TAG, "URL for bin file registered"); // Log a debug message.
+    Log_Debug(_logger, "URL for bin file registered"); // Log a debug message.
 
     return DOWNLOADER_ERROR::OK; // Return success.
 }
@@ -183,8 +183,8 @@ DOWNLOADER_ERROR Downloader::setURLForVersion(const char *uRLForVersionFile)
 {
     if (uRLForVersionFile == nullptr)
     {
-        Log_Error(TAG, "URL for version file is null"); // Log an error if the URL for the version file is null.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;      // Return an error indicating an invalid argument.
+        Log_Error(_logger, "URL for version file is null"); // Log an error if the URL for the version file is null.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;          // Return an error indicating an invalid argument.
     }
 
     size_t urlLength = strlen(uRLForVersionFile) < URL_MAX_LENGTH ? strlen(uRLForVersionFile) : URL_MAX_LENGTH;
@@ -193,11 +193,11 @@ DOWNLOADER_ERROR Downloader::setURLForVersion(const char *uRLForVersionFile)
 
     if (strlen(_uRLForVersionFile) == 0)
     {
-        Log_Error(TAG, "URL for version file is empty"); // Log an error if the URL for the version file is empty.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;       // Return an error indicating an invalid argument.
+        Log_Error(_logger, "URL for version file is empty"); // Log an error if the URL for the version file is empty.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;           // Return an error indicating an invalid argument.
     }
 
-    Log_Debug(TAG, "URL for version file registered"); // Log a debug message.
+    Log_Debug(_logger, "URL for version file registered"); // Log a debug message.
 
     return DOWNLOADER_ERROR::OK; // Return success.
 }
@@ -206,12 +206,12 @@ DOWNLOADER_ERROR Downloader::setTimeout(uint16_t timeOut)
 {
     if (timeOut < 50 || timeOut > 60000)
     {
-        Log_Error(TAG, "Timeout is out of range (50-60000)"); // Log an error if the timeout is out of the valid range.
-        return DOWNLOADER_ERROR::INVALID_ARGUMENT;            // Return an error indicating an invalid argument.
+        Log_Error(_logger, "Timeout is out of range (50-60000)"); // Log an error if the timeout is out of the valid range.
+        return DOWNLOADER_ERROR::INVALID_ARGUMENT;                // Return an error indicating an invalid argument.
     }
     _timeOut = timeOut; // Set the timeout value.
 
-    Log_Debug(TAG, "Timeout registered"); // Log a debug message.
+    Log_Debug(_logger, "Timeout registered"); // Log a debug message.
 
     return DOWNLOADER_ERROR::OK; // Return success.
 }
@@ -220,8 +220,8 @@ Stream *Downloader::getStreamPtr()
 {
     if (_streamSize == 0 || _wifiClient == nullptr || _httpClient == nullptr)
     {
-        Log_Error(TAG, "Firmware is null"); // Log an error if the firmware or related resources are null.
-        return nullptr;                     // Return a nullptr to indicate a problem.
+        Log_Error(_logger, "Firmware is null"); // Log an error if the firmware or related resources are null.
+        return nullptr;                         // Return a nullptr to indicate a problem.
     }
     return _wifiClient; // Return the WiFi client pointer.
 }
@@ -247,8 +247,8 @@ DOWNLOADER_ERROR Downloader::CreateHttpClient(const char *url)
     _httpClient = new HTTPClient(); // Create an HTTP client instance.
     if (!_httpClient->begin(*_wifiClient, url))
     {
-        Log_Error(TAG, "HTTPClient begin failed"); // Log an error if HTTP client creation fails.
-        return DOWNLOADER_ERROR::UNKNOWN;          // Return an unknown error.
+        Log_Error(_logger, "HTTPClient begin failed"); // Log an error if HTTP client creation fails.
+        return DOWNLOADER_ERROR::UNKNOWN;              // Return an unknown error.
     }
     _httpClient->useHTTP10(true);                                    // Use HTTP/1.0 for compatibility.
     _httpClient->setTimeout(_timeOut);                               // Set the HTTP request timeout.

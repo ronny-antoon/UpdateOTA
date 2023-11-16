@@ -12,6 +12,7 @@
 #include <WiFiClient.h> // WiFiClient
 #include <HTTPClient.h> // HTTPClient
 #include <Stream.h>     // Stream
+#include <MultiPrinterLoggerInterface.hpp>
 
 #include "DownloaderInterface.hpp"
 
@@ -24,7 +25,7 @@ public:
     /**
      * @brief Construct a new Downloader object
      */
-    Downloader();
+    Downloader(MultiPrinterLoggerInterface *logger);
 
     /**
      * @brief Destroy the Downloader object
@@ -143,7 +144,7 @@ private:
      */
     DOWNLOADER_ERROR CreateHttpClient(const char *url);
 
-    const char *TAG = "Downloader"; // Tag for logging
+    MultiPrinterLoggerInterface *_logger; // Logger
 };
 
 #endif // DOWNLOADER_HPP

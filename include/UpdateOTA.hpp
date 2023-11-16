@@ -7,9 +7,10 @@
  * @author Ronny Antoon
  */
 
+#include <MultiPrinterLoggerInterface.hpp>
+
 #include "DownloaderInterface.hpp"
 #include "UpdaterInterface.hpp"
-
 #include "UpdateOTAInterface.hpp"
 
 /**
@@ -26,7 +27,7 @@ public:
      * @param downloader A pointer to a DownloaderInterface object. (Dependency Injection)
      * @param updater A pointer to a UpdaterInterface object. (Dependency Injection)
      */
-    UpdateOTA(DownloaderInterface *downloader, UpdaterInterface *updater);
+    UpdateOTA(DownloaderInterface *downloader, UpdaterInterface *updater, MultiPrinterLoggerInterface *logger);
 
     /**
      * @brief Destructor for the UpdateOTA class.
@@ -101,7 +102,7 @@ private:
      */
     bool newerVersion(const char *_currentVersion, const char *_serverVersion);
 
-    const char *TAG = "UpdateOTA"; // The tag name for logging.
+    MultiPrinterLoggerInterface *_logger;
 };
 
 #endif // UPDATE_OTA_HPP

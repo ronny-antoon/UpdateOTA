@@ -3,18 +3,18 @@
  * @author Ronny Antoon
  */
 
-#include <stddef.h>                   // size_t
-#include <stdint.h>                   // uint8_t
-#include <esp32-hal-gpio.h>           // HIGH, LOW
-#include <esp_partition.h>            // esp_partition_t
-#include <esp_ota_ops.h>              // esp_ota_set_boot_partition
-#include <Esp.h>                      // ESP.getFreeSketchSpace
-#include <Stream.h>                   // Stream
-#include <API_MultiPrinterLogger.hpp> // Log_Debug, Log_Error
+#include <stddef.h>                        // size_t
+#include <stdint.h>                        // uint8_t
+#include <esp32-hal-gpio.h>                // HIGH, LOW
+#include <esp_partition.h>                 // esp_partition_t
+#include <esp_ota_ops.h>                   // esp_ota_set_boot_partition
+#include <Esp.h>                           // ESP.getFreeSketchSpace
+#include <Stream.h>                        // Stream
+#include <MultiPrinterLoggerInterface.hpp> // logger
 
 #include "Updater.hpp"
 
-Updater::Updater(uint8_t pin, bool ledOnHigh)
+Updater::Updater(uint8_t pin, bool ledOnHigh, MultiPrinterLoggerInterface *logger)
 {
     _pin = pin;               // Pin Number for the LED.
     _ledOnHigh = ledOnHigh;   // Set to true if the LED is on when the pin is HIGH.
@@ -25,6 +25,7 @@ Updater::Updater(uint8_t pin, bool ledOnHigh)
     _streamData = nullptr;    // Stream object to read the data from.
     _newPartition = nullptr;  // Pointer to the partition to be updated.
     _updateTimer = 0;         // Timer to measure the update duration.
+    _logger = logger;         // Logger object to log messages.
 
     // Initialize the LED pin if it is provided and set it to OFF.
     if (_pin != -1)
@@ -98,7 +99,7 @@ UPDATER_ERROR Updater::startUpdate(Stream *streamData, int streamLength, UPDATER
         toWrite = readBlockFirmwareToBuffer(written, BLOCK_SIZE_P); // Read the next block from the input stream.
         if (toWrite <= 0)
         {
-            Log_Error(TAG, "Can't read from firmware!");
+            Log_Error(_logger, "Can't read from firmware!");
             return _abort(UPDATER_ERROR::READ_FAILED);
         }
 
@@ -142,7 +143,7 @@ UPDATER_ERROR Updater::startUpdate(Stream *streamData, int streamLength, UPDATER
 void Updater::callOnStart()
 {
     _updateTimer = millis(); // Start the timer to measure the update duration.
-    Log_Debug(TAG, "Update started");
+    Log_Debug(_logger, "Update started");
     if (_onStart_cb)
     {
         _onStart_cb();
@@ -152,7 +153,7 @@ void Updater::callOnStart()
 // Method to invoke the callback for update progress.
 void Updater::callOnProgress(int _wretten, int _length)
 {
-    Log_Debug(TAG, "Progress: %d%%", (_wretten * 100) / _length);
+    Log_Debug(_logger, "Progress: %d%%", (_wretten * 100) / _length);
     if (_onProgress_cb)
     {
         _onProgress_cb(_wretten, _length);
@@ -162,7 +163,7 @@ void Updater::callOnProgress(int _wretten, int _length)
 // Method to invoke the callback for update completion.
 void Updater::callOnEnd()
 {
-    Log_Debug(TAG, "Update finished, The update took: %.2f seconds", (double)(millis() - _updateTimer) / 1000);
+    Log_Debug(_logger, "Update finished, The update took: %.2f seconds", (double)(millis() - _updateTimer) / 1000);
     if (_onEnd_cb)
     {
         _onEnd_cb();
@@ -196,7 +197,7 @@ size_t Updater::readBlockFirmwareToBuffer(size_t offset, size_t length)
     // Check if the read operation was successful. If not, retry up to 30 times. With a delay of 100ms between retries.
     while (readed == 0 && retry < 30)
     {
-        Log_Debug(TAG, "Reading block from firmware, offset: %d, length: %d. Got delayed because unkown issue.", offset, length);
+        Log_Debug(_logger, "Reading block from firmware, offset: %d, length: %d. Got delayed because unkown issue.", offset, length);
         delay(100);
         readed = _streamData->readBytes(_buffer, length);
         retry++;
@@ -214,7 +215,7 @@ UPDATER_ERROR Updater::writeBlockBufferToPartition(size_t offset, size_t length)
     esp_err_t err = esp_partition_write(_newPartition, offset, _buffer, length);
     if (err != ESP_OK)
     {
-        Log_Error(TAG, "Can't write to partition!");
+        Log_Error(_logger, "Can't write to partition!");
         return UPDATER_ERROR::PARTITION_WRITE_FAILED;
     }
     return UPDATER_ERROR::OK;
@@ -227,7 +228,7 @@ UPDATER_ERROR Updater::changeBootPartition()
     esp_err_t err = esp_ota_set_boot_partition(_newPartition);
     if (err != ESP_OK)
     {
-        Log_Error(TAG, "Change boot partition failed!");
+        Log_Error(_logger, "Change boot partition failed!");
         return UPDATER_ERROR::CHANGE_BOOT_PARTITION_FAILED;
     }
     return UPDATER_ERROR::OK;
@@ -258,7 +259,7 @@ UPDATER_ERROR Updater::resetPartitionRange(size_t offset, size_t length)
     esp_err_t err = esp_partition_erase_range(_newPartition, offset, length);
     if (err != ESP_OK)
     {
-        Log_Error(TAG, "Can't erase partition!");
+        Log_Error(_logger, "Can't erase partition!");
         return UPDATER_ERROR::UNKNOWN;
     }
     return UPDATER_ERROR::OK;
@@ -271,7 +272,7 @@ UPDATER_ERROR Updater::getAPPUpdatePartition()
     _newPartition = esp_ota_get_next_update_partition(NULL);
     if (_newPartition == NULL)
     {
-        Log_Error(TAG, "There is no updatable partition.");
+        Log_Error(_logger, "There is no updatable partition.");
         return UPDATER_ERROR::NO_PARTITION_AVAILABLE;
     }
     return UPDATER_ERROR::OK;
@@ -284,7 +285,7 @@ UPDATER_ERROR Updater::getSPIFFSPartition()
     _newPartition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
     if (_newPartition == NULL)
     {
-        Log_Error(TAG, "There is no SPIFFS partition.");
+        Log_Error(_logger, "There is no SPIFFS partition.");
         return UPDATER_ERROR::NO_PARTITION_AVAILABLE;
     }
     return UPDATER_ERROR::OK;

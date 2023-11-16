@@ -9,10 +9,11 @@
  * This class provides methods for performing firmware and SPIFFS updates on ESP32 devices.
  */
 
-#include <stdint.h>         // uint8_t
-#include <esp32-hal-gpio.h> // HIGH, LOW
-#include <esp_partition.h>  // esp_partition_t
-#include <Stream.h>         // Stream
+#include <stdint.h>                        // uint8_t
+#include <esp32-hal-gpio.h>                // HIGH, LOW
+#include <esp_partition.h>                 // esp_partition_t
+#include <Stream.h>                        // Stream
+#include <MultiPrinterLoggerInterface.hpp> // logger
 
 #include "UpdaterInterface.hpp"
 /**
@@ -29,7 +30,7 @@ public:
      * @param pin The GPIO pin number connected to an LED indicator.
      * @param ledOnHigh Set to `true` if the LED is on when the pin is HIGH.
      */
-    Updater(uint8_t pin = 2, bool ledOnHigh = HIGH);
+    Updater(uint8_t pin = 2, bool ledOnHigh = HIGH, MultiPrinterLoggerInterface *logger = nullptr);
 
     /**
      * @brief Destructor for the Updater class.
@@ -201,7 +202,7 @@ private:
     void (*_onEnd_cb)();
     void (*_onError_cb)(int);
 
-    const char *TAG = "Updater"; // Tag for logging
+    MultiPrinterLoggerInterface *_logger;
 };
 
 #endif // UPDATER_HPP
