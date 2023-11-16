@@ -2,6 +2,7 @@
 version = 1
 firmware = "flasher_args.json"
 elf = "firmware.elf"
+gdbServerPort=3333
 
 # Forward http://localhost:8180 to port 80 on the simulated ESP32:
 [[net.forward]]
