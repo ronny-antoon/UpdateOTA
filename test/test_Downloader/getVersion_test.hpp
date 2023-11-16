@@ -9,7 +9,7 @@ class getVersionTest : public ::testing::Test
 {
 protected:
     Downloader *downloader;
-    const char *urlvirsion = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA_M/main/examples/updateFirmware/version.txt";
+    const char *urlvirsion = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA/main/examples/version.txt";
     const char *CA_CERT =
         "-----BEGIN CERTIFICATE-----\n"
         // (Certificate data goes here)

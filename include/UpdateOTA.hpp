@@ -27,7 +27,7 @@ public:
      * @param downloader A pointer to a DownloaderInterface object. (Dependency Injection)
      * @param updater A pointer to a UpdaterInterface object. (Dependency Injection)
      */
-    UpdateOTA(DownloaderInterface *downloader, UpdaterInterface *updater, MultiPrinterLoggerInterface *logger);
+    UpdateOTA(DownloaderInterface *downloader, UpdaterInterface *updater, MultiPrinterLoggerInterface *logger = nullptr);
 
     /**
      * @brief Destructor for the UpdateOTA class.

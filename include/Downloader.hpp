@@ -25,7 +25,7 @@ public:
     /**
      * @brief Construct a new Downloader object
      */
-    Downloader(MultiPrinterLoggerInterface *logger);
+    Downloader(MultiPrinterLoggerInterface *logger = nullptr);
 
     /**
      * @brief Destroy the Downloader object

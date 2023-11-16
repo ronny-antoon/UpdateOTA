@@ -9,7 +9,7 @@ class setURLForBinTest : public ::testing::Test
 {
 protected:
     Downloader *downloader;
-    const char *urlFirmware = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA_M/main/examples/updateFirmware/firmware.bin";
+    const char *urlFirmware = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA/main/examples/firmware.bin";
     void SetUp() override
     {
         downloader = new Downloader();

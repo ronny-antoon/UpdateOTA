@@ -11,7 +11,7 @@ class DownloadTest : public ::testing::Test
 {
 protected:
     Downloader *downloader;
-    const char *urlFirmware = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA_M/main/examples/updateFirmware/firmware.bin";
+    const char *urlFirmware = "https://raw.githubusercontent.com/ronny-antoon/UpdateOTA/main/examples/firmware.bin";
     const char *CA_CERT =
         "-----BEGIN CERTIFICATE-----\n"
         // (Certificate data goes here)
