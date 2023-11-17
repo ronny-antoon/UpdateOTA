@@ -3,10 +3,11 @@
 #include <Arduino.h>
 #include <gtest/gtest.h>
 
-#include "test_Downloader/IncludeAll_test.hpp"
+#include "test_UpdateOTA.hpp"
 
 void setup()
 {
+    // Initialize Serial
     Serial.begin(115200);
     ::testing::InitGoogleTest();
 }

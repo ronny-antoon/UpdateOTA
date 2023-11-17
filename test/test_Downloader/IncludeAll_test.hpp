@@ -1,6 +1,0 @@
-#include "download_test.hpp"
-#include "getVersion_test.hpp"
-#include "setCA_test.hpp"
-#include "setURLForBin_test.hpp"
-#include "setURLForVersion_test.hpp"
-#include "setTimeout_test.hpp"
