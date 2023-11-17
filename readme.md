@@ -34,7 +34,7 @@ The UpdateOTA Library streamlines the implementation of Over-The-Air firmware up
 ## Dependencies
 
 The UpdateOTA Library depends on the following libraries:
-- MultiPrinterLogger @ 3.1.1
+- MultiPrinterLogger @ 4.1.0
 - HTTPClient
 - WiFi
 - WiFiClientSecure
