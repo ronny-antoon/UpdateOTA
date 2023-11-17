@@ -1,7 +1,6 @@
 # 🌟UpdateOTA Library🌟
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=BACPRJTAU4G4E)
-
 [![Latest](https://img.shields.io/github/v/tag/ronny-antoon/UpdateOTA?color=red&label=last+release)](https://github.com/ronny-antoon/UpdateOTA/releases)
 [![Latest](https://badges.registry.platformio.org/packages/ronny-antoon/library/UpdateOTA.svg)](https://registry.platformio.org/libraries/ronny-antoon/UpdateOTA)
 [![UnitTests](https://github.com/ronny-antoon/UpdateOTA/actions/workflows/build-and-test-embeded.yaml/badge.svg)](https://github.com/ronny-antoon/UpdateOTA/actions/workflows/build-and-test-embeded.yaml)
