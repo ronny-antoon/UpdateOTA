@@ -5,6 +5,7 @@
 #include <esp_ota_ops.h>                   // esp_ota_set_boot_partition
 #include <HTTPClient.h>                    // HTTPClient  And WiFiClientSecure
 #include <MultiPrinterLoggerInterface.hpp> // MultiPrinterLoggerInterface
+#include <RelayModuleInterface.hpp>        // RelayModuleInterface
 
 #include "UpdateOTAInterface.hpp"
 
@@ -17,7 +18,7 @@ public:
     /**
      * @brief Constructor
      */
-    UpdateOTA(MultiPrinterLoggerInterface *logger = nullptr);
+    UpdateOTA(MultiPrinterLoggerInterface *logger = nullptr, RelayModuleInterface *relayModule = nullptr);
 
     /**
      * @brief Destructor
@@ -40,7 +41,7 @@ public:
      *      UpdateOTAError::UPDATE_PROGRESS_ERROR   - If there is an error in the update progress
      *      UpdateOTAError::PARTITION_NOT_BOOTABLE  - If the selected partition is not bootable
      */
-    UpdateOTAError startUpdate(const char *uRL, bool isFirmware, uint8_t pinStatus = 0) override;
+    UpdateOTAError startUpdate(const char *uRL, bool isFirmware) override;
 
     /**
      * @brief Get the version number from the specified URL and store it in the provided buffer
@@ -141,6 +142,7 @@ private:
      */
     void toggleLed();
 
+    RelayModuleInterface *_relayModule;   ///< RelayModuleInterface instance for controlling an LED during the update
     MultiPrinterLoggerInterface *_logger; ///< Logger for logging messages
     WiFiClientSecure *_wifiClientSecure;  ///< WiFiClientSecure instance for secure communication
     HTTPClient *_httpClient;              ///< HTTPClient instance for handling HTTP requests
@@ -149,7 +151,6 @@ private:
     char _buffer[BLOCK_SIZE_P];           ///< Buffer for reading/writing data blocks
     const esp_partition_t *_newPartition; ///< Pointer to the new partition for firmware update
     bool _isFirmware;                     ///< Flag indicating whether the update is for firmware
-    uint8_t _pinStatus;                   ///< Pin status for controlling an LED during the update
     char ca_cert[1400] =                  ///< Certificate data for secure communication
         "-----BEGIN CERTIFICATE-----\n"
         // (Certificate data goes here)

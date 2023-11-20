@@ -35,11 +35,13 @@ The UpdateOTA Library streamlines the implementation of Over-The-Air firmware up
 
 The UpdateOTA Library depends on the following libraries:
 - MultiPrinterLogger @ 4.1.0
+- RelayModule @ 4.1.0
 - HTTPClient
 - WiFi
 - WiFiClientSecure
 - esp_ota_ops.h
 - esp_partition.h
+
 Ensure that these dependencies are correctly configured in your project.
 
 ## Installation
@@ -51,7 +53,7 @@ To integrate the *UpdateOTA* library into your PlatformIO project, follow these 
 
 2. Add the following line to the `lib_deps` option under the `[env:]` section:
 ```cpp
-ronny-antoon/UpdateOTA@^4.1.0
+ronny-antoon/UpdateOTA@^4.5.0
 ```
 
 3. Build your project, and PlatformIO will automatically handle library installation.

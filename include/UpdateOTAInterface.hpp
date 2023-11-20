@@ -32,7 +32,6 @@ public:
      * @brief Start the OTA update process with the specified URL, update type, and pin status
      * @param uRL The URL of the update
      * @param isFirmware Flag indicating whether the update is for firmware
-     * @param pinStatus The pin status for controlling an LED during the update
      * @return UpdateOTAError indicating the success or failure of the OTA update process, Options:-
      *      UpdateOTAError::SUCCESS                 - If the OTA update process completed successfully
      *      UpdateOTAError::NO_INTERNET             - If there is no internet connection
@@ -45,7 +44,7 @@ public:
      *      UpdateOTAError::NO_ENOUGH_SPACE         - If there is insufficient space for the update
      *      UpdateOTAError::UNKNOWN                 - If there is an unknown error during update
      */
-    virtual UpdateOTAError startUpdate(const char *uRL, bool isFirmware, uint8_t pinStatus) = 0;
+    virtual UpdateOTAError startUpdate(const char *uRL, bool isFirmware) = 0;
 
     /**
      * @brief Get the version number from the specified URL and store it in the provided buffer

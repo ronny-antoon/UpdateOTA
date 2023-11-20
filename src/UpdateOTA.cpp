@@ -1,12 +1,13 @@
 #include "UpdateOTA.hpp"
 
-UpdateOTA::UpdateOTA(MultiPrinterLoggerInterface *logger) : _logger(logger)
+UpdateOTA::UpdateOTA(MultiPrinterLoggerInterface *logger, RelayModuleInterface *relayModule)
+    : _logger(logger),
+      _relayModule(relayModule)
 {
     Log_Debug(_logger, "UpdateOTA constructor");
     // Initialize member variables
     _newPartition = nullptr;
     _isFirmware = false;
-    _pinStatus = 0;
     _uRL = nullptr;
     _httpCode = 0;
     _wifiClientSecure = nullptr;
@@ -30,12 +31,11 @@ UpdateOTA::~UpdateOTA()
     }
 }
 
-UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware, uint8_t pinStatus)
+UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
 {
     // Set member variables based on input parameters
     _uRL = uRL;
     _isFirmware = isFirmware;
-    _pinStatus = pinStatus;
 
     // Check if the device is connected to the internet
     if (WiFi.status() != WL_CONNECTED)
@@ -182,11 +182,9 @@ UpdateOTAError UpdateOTA::processGetRequest()
 UpdateOTAError UpdateOTA::updateFirmware()
 {
     // Update the firmware
-    if (_pinStatus != 0)
-    {
-        pinMode(_pinStatus, OUTPUT);    // Set the pin to output mode.
-        digitalWrite(_pinStatus, HIGH); // Turn on the LED.
-    }
+    if (_relayModule != nullptr)
+        _relayModule->turnOn();
+
     size_t written = 0; // Variable to keep track of the number of bytes written.
     size_t toWrite = 0; // Variable to keep track of the number of bytes to write.
     uint32_t _streamLength = _httpClient->getSize();
@@ -212,8 +210,9 @@ UpdateOTAError UpdateOTA::updateFirmware()
 
     printProgress(written, _streamLength); // Print the progress.
     _httpClient->end();                    // Close the input stream.
-    if (_pinStatus != 0)
-        digitalWrite(_pinStatus, LOW); // Turn off the LED.
+
+    if (_relayModule != nullptr)
+        _relayModule->turnOff();
 
     if (_streamLength != written)
         return UpdateOTAError::UPDATE_PROGRESS_ERROR; // Check if the number of bytes written is equal to the stream length. If not return an error.
@@ -291,6 +290,6 @@ void UpdateOTA::printProgress(size_t written, size_t total)
 void UpdateOTA::toggleLed()
 {
     // Toggle the LED
-    if (_pinStatus != 0)
-        digitalWrite(_pinStatus, !digitalRead(_pinStatus));
+    if (_relayModule != nullptr)
+        _relayModule->toggle();
 }
