@@ -1,11 +1,13 @@
 #ifndef UPDATE_OTA_HPP
 #define UPDATE_OTA_HPP
 
-#include <esp_partition.h>                 // esp_partition_t
-#include <esp_ota_ops.h>                   // esp_ota_set_boot_partition
-#include <HTTPClient.h>                    // HTTPClient  And WiFiClientSecure
 #include <MultiPrinterLoggerInterface.hpp> // MultiPrinterLoggerInterface
 #include <RelayModuleInterface.hpp>        // RelayModuleInterface
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
 
 #include "UpdateOTAInterface.hpp"
 
