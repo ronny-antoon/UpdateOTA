@@ -26,7 +26,7 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO Project
-        run: pio run -e embeded_env
+        run: pio test -e embeded_env --without-uploading --without-testing
 
       - name: move firmware extention elf to root
         run: mv .pio/build/embeded_env/firmware.elf firmware.elf
