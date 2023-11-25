@@ -1,4 +1,3 @@
-#ifdef GLOBAL_TEST_ENVIRONMENT
 
 #include <Arduino.h>
 #include <gtest/gtest.h>
@@ -23,5 +22,3 @@ void loop()
 
     delay(10000);
 }
-
-#endif // GLOBAL_TEST_ENVIRONMENT

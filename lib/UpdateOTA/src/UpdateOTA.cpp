@@ -4,7 +4,7 @@ UpdateOTA::UpdateOTA(MultiPrinterLoggerInterface *logger, RelayModuleInterface *
     : _logger(logger),
       _relayModule(relayModule)
 {
-    Log_Debug(_logger, "UpdateOTA constructor");
+    Log_Debug(_logger, "UpdateOTA created");
     // Initialize member variables
     _newPartition = nullptr;
     _isFirmware = false;
@@ -16,7 +16,7 @@ UpdateOTA::UpdateOTA(MultiPrinterLoggerInterface *logger, RelayModuleInterface *
 
 UpdateOTA::~UpdateOTA()
 {
-    Log_Debug(_logger, "UpdateOTA destructor");
+    Log_Debug(_logger, "UpdateOTA destroyed");
     // Clean up resources on destruction
     if (_httpClient != nullptr)
     {
@@ -33,13 +33,18 @@ UpdateOTA::~UpdateOTA()
 
 UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
 {
+    Log_Info(_logger, "UpdateOTA startUpdate: URL='%s', isFirmware=%s", uRL, isFirmware ? "true" : "false");
+
     // Set member variables based on input parameters
     _uRL = uRL;
     _isFirmware = isFirmware;
 
     // Check if the device is connected to the internet
     if (WiFi.status() != WL_CONNECTED)
+    {
+        Log_Error(_logger, "UpdateOTA startUpdate error: No internet connection");
         return UpdateOTAError::NO_INTERNET;
+    }
 
     // Initialize WiFiClientSecure and HTTPClient
     _wifiClientSecure = new WiFiClientSecure();
@@ -49,7 +54,10 @@ UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
     // Process the GET request
     err = processGetRequest();
     if (err != UpdateOTAError::SUCCESS)
+    {
+        Log_Error(_logger, "UpdateOTA startUpdate error: Failed to process GET request, ErrorCode=%d", err);
         return err;
+    }
 
     // Check if there is enough space for the firmware
     uint64_t maxSketchSpace = ESP.getFreeSketchSpace() - (ESP.getFreeSketchSpace() % BLOCK_SIZE_P);
@@ -59,21 +67,33 @@ UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
     // Get the next updatable partition and check if there is a partition available for update
     err = selectPartition();
     if (err != UpdateOTAError::SUCCESS)
+    {
+        Log_Error(_logger, "UpdateOTA startUpdate error: Insufficient space for update");
         return err;
+    }
 
     // Update the firmware
     err = updateFirmware();
     if (err != UpdateOTAError::SUCCESS)
+    {
+        Log_Error(_logger, "UpdateOTA startUpdate error: Failed to update firmware, ErrorCode=%d", err);
         return err;
+    }
 
     // If the update is not for the firmware, then return
     if (!_isFirmware)
+    {
+        Log_Info(_logger, "UpdateOTA startUpdate: Update completed successfully (not firmware)");
         return UpdateOTAError::SUCCESS;
+    }
 
     // Change the boot partition to the new partition
     err = changeBootPartition();
     if (err != UpdateOTAError::SUCCESS)
+    {
+        Log_Error(_logger, "UpdateOTA startUpdate error: Failed to change boot partition, ErrorCode=%d", err);
         return err;
+    }
 
     // Restart the ESP
     ESP.restart();
@@ -84,9 +104,14 @@ UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
 
 UpdateOTAError UpdateOTA::getVersionNumber(const char *uRL, char *buffer, uint8_t bufferSize)
 {
+    Log_Verbose(_logger, "UpdateOTA getVersionNumber: URL='%s', BufferSize=%u", uRL, bufferSize);
+
     // Check if the device is connected to the internet
     if (WiFi.status() != WL_CONNECTED)
+    {
+        Log_Error(_logger, "UpdateOTA getVersionNumber error: No internet connection");
         return UpdateOTAError::NO_INTERNET;
+    }
 
     // Set member variables based on input parameters
     _uRL = uRL;
@@ -97,22 +122,33 @@ UpdateOTAError UpdateOTA::getVersionNumber(const char *uRL, char *buffer, uint8_
     // Process the GET request
     err = processGetRequest();
     if (err != UpdateOTAError::SUCCESS)
+    {
+        Log_Error(_logger, "UpdateOTA getVersionNumber error: Failed to process GET request, ErrorCode=%d", err);
         return err;
+    }
 
     // Check if there is enough space for the firmware
     if (_httpClient->getSize() > bufferSize)
+    {
+        Log_Error(_logger, "UpdateOTA getVersionNumber error: Insufficient space for update");
         return UpdateOTAError::NO_ENOUGH_SPACE;
+    }
 
     // Read bytes directly into the buffer and null-terminate it
     _wifiClientSecure->readBytes(buffer, _httpClient->getSize());
-
     buffer[_httpClient->getSize()] = '\0'; // Null-terminate the string
 
+    Log_Debug(_logger, "UpdateOTA getVersionNumber: Version retrieved successfully");
     return UpdateOTAError::SUCCESS;
 }
 
 void UpdateOTA::errorToString(UpdateOTAError error, char *buffer, uint8_t bufferSize)
 {
+    if (buffer == nullptr || bufferSize < 50)
+    {
+        Log_Error(_logger, "Invalid error string buffer");
+        return;
+    }
     // Convert an update OTA error to a human-readable string and store it in the provided buffer
     switch (error)
     {
@@ -163,27 +199,34 @@ UpdateOTAError UpdateOTA::processGetRequest()
 
     _httpCode = _httpClient->GET();
 
+    Log_Verbose(_logger, "UpdateOTA processGetRequest: HTTP Code=%d", _httpCode);
+
     switch (_httpCode)
     {
     case HTTP_CODE_OK:
+        Log_Verbose(_logger, "UpdateOTA processGetRequest: Success");
         return UpdateOTAError::SUCCESS;
     case HTTP_CODE_NOT_FOUND:
+        Log_Error(_logger, "UpdateOTA processGetRequest error: Page not found");
         return UpdateOTAError::PAGE_NOT_FOUND;
     case HTTP_CODE_UNAUTHORIZED:
+        Log_Error(_logger, "UpdateOTA processGetRequest error: Unauthorized access");
         return UpdateOTAError::UNAUTHORIZED;
     case HTTP_CODE_BAD_REQUEST:
+        Log_Error(_logger, "UpdateOTA processGetRequest error: Bad request received");
         return UpdateOTAError::BAD_REQUEST;
     default:
-        break;
+        Log_Error(_logger, "UpdateOTA processGetRequest error: Unknown HTTP Code=%d", _httpCode);
+        return UpdateOTAError::UNKNOWN;
     }
-    return UpdateOTAError::UNKNOWN;
 }
 
 UpdateOTAError UpdateOTA::updateFirmware()
 {
+    Log_Verbose(_logger, "Updating firmware");
     // Update the firmware
     if (_relayModule != nullptr)
-        _relayModule->turnOn();
+        _relayModule->setState(true);
 
     size_t written = 0; // Variable to keep track of the number of bytes written.
     size_t toWrite = 0; // Variable to keep track of the number of bytes to write.
@@ -212,7 +255,7 @@ UpdateOTAError UpdateOTA::updateFirmware()
     _httpClient->end();                    // Close the input stream.
 
     if (_relayModule != nullptr)
-        _relayModule->turnOff();
+        _relayModule->setState(false);
 
     if (_streamLength != written)
         return UpdateOTAError::UPDATE_PROGRESS_ERROR; // Check if the number of bytes written is equal to the stream length. If not return an error.
@@ -259,7 +302,12 @@ UpdateOTAError UpdateOTA::changeBootPartition()
 {
     // Change the boot partition
     if (esp_ota_set_boot_partition(_newPartition) != ESP_OK)
+    {
+        Log_Error(_logger, "UpdateOTA changeBootPartition error: Failed to set boot partition");
         return UpdateOTAError::PARTITION_NOT_BOOTABLE;
+    }
+
+    Log_Verbose(_logger, "UpdateOTA changeBootPartition: Boot partition changed successfully");
     return UpdateOTAError::SUCCESS;
 }
 
@@ -268,23 +316,31 @@ UpdateOTAError UpdateOTA::selectPartition()
     // Select the partition for update
     if (_isFirmware)
     {
-        _newPartition = esp_ota_get_next_update_partition(NULL);
+        _newPartition = esp_ota_get_next_update_partition(nullptr);
     }
     else
     {
-        _newPartition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
+        _newPartition = esp_partition_find_first(
+            ESP_PARTITION_TYPE_DATA,
+            ESP_PARTITION_SUBTYPE_DATA_SPIFFS,
+            nullptr);
     }
 
-    if (_newPartition == NULL)
+    if (_newPartition == nullptr)
+    {
+        Log_Error(_logger, "UpdateOTA selectPartition error: No partition available for update");
         return UpdateOTAError::NO_PARTITION_AVAILABLE;
+    }
 
+    Log_Verbose(_logger, "UpdateOTA selectPartition: Partition selected successfully");
     return UpdateOTAError::SUCCESS;
 }
 
 void UpdateOTA::printProgress(size_t written, size_t total)
 {
-    // Print the update progress
-    Log_Debug(_logger, "Progress: %d%%", (100 * written) / total);
+    // Print the progress
+    float progress = (float)written / (float)total * 100;
+    Log_Debug(_logger, "UpdateOTA printProgress: Progress=%.2f%%", progress);
 }
 
 void UpdateOTA::toggleLed()
