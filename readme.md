@@ -53,7 +53,7 @@ To integrate the *UpdateOTA* library into your PlatformIO project, follow these 
 
 2. Add the following line to the `lib_deps` option under the `[env:]` section:
 ```cpp
-ronny-antoon/UpdateOTA@^4.5.0
+ronny-antoon/UpdateOTA@^7.0.0
 ```
 
 3. Build your project, and PlatformIO will automatically handle library installation.

@@ -33,7 +33,7 @@ UpdateOTA::~UpdateOTA()
 
 UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
 {
-    Log_Info(_logger, "UpdateOTA startUpdate: URL='%s', isFirmware=%s", uRL, isFirmware ? "true" : "false");
+    Log_Verbose(_logger, "UpdateOTA startUpdate: URL='%s', isFirmware=%s", uRL, isFirmware ? "true" : "false");
 
     // Set member variables based on input parameters
     _uRL = uRL;
@@ -83,7 +83,7 @@ UpdateOTAError UpdateOTA::startUpdate(const char *uRL, bool isFirmware)
     // If the update is not for the firmware, then return
     if (!_isFirmware)
     {
-        Log_Info(_logger, "UpdateOTA startUpdate: Update completed successfully (not firmware)");
+        Log_Verbose(_logger, "UpdateOTA startUpdate: Update completed successfully (not firmware)");
         return UpdateOTAError::SUCCESS;
     }
 
@@ -138,7 +138,7 @@ UpdateOTAError UpdateOTA::getVersionNumber(const char *uRL, char *buffer, uint8_
     _wifiClientSecure->readBytes(buffer, _httpClient->getSize());
     buffer[_httpClient->getSize()] = '\0'; // Null-terminate the string
 
-    Log_Debug(_logger, "UpdateOTA getVersionNumber: Version retrieved successfully");
+    Log_Verbose(_logger, "UpdateOTA getVersionNumber: Version retrieved successfully");
     return UpdateOTAError::SUCCESS;
 }
 
@@ -340,7 +340,7 @@ void UpdateOTA::printProgress(size_t written, size_t total)
 {
     // Print the progress
     float progress = (float)written / (float)total * 100;
-    Log_Debug(_logger, "UpdateOTA printProgress: Progress=%.2f%%", progress);
+    Log_Verbose(_logger, "UpdateOTA printProgress: Progress=%.2f%%", progress);
 }
 
 void UpdateOTA::toggleLed()
