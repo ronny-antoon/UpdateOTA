@@ -8,7 +8,7 @@
 /**
  * @brief Enum representing different update OTA errors
  */
-enum UpdateOTAError
+enum UpdateOTAError : uint8_t
 {
     SUCCESS,                ///< Update process completed successfully
     NO_INTERNET,            ///< No internet connection available

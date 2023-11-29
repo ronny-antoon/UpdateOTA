@@ -144,16 +144,16 @@ private:
      */
     void toggleLed();
 
-    RelayModuleInterface *_relayModule;   ///< RelayModuleInterface instance for controlling an LED during the update
-    MultiPrinterLoggerInterface *_logger; ///< Logger for logging messages
-    WiFiClientSecure *_wifiClientSecure;  ///< WiFiClientSecure instance for secure communication
-    HTTPClient *_httpClient;              ///< HTTPClient instance for handling HTTP requests
-    uint16_t _httpCode;                   ///< HTTP response code
-    const char *_uRL;                     ///< URL for the update
-    char _buffer[BLOCK_SIZE_P];           ///< Buffer for reading/writing data blocks
-    const esp_partition_t *_newPartition; ///< Pointer to the new partition for firmware update
-    bool _isFirmware;                     ///< Flag indicating whether the update is for firmware
-    char ca_cert[1400] =                  ///< Certificate data for secure communication
+    RelayModuleInterface *_relayModule = nullptr;   ///< RelayModuleInterface instance for controlling an LED during the update
+    MultiPrinterLoggerInterface *_logger = nullptr; ///< Logger for logging messages
+    WiFiClientSecure *_wifiClientSecure = nullptr;  ///< WiFiClientSecure instance for secure communication
+    HTTPClient *_httpClient = nullptr;              ///< HTTPClient instance for handling HTTP requests
+    uint16_t _httpCode = 0;                         ///< HTTP response code
+    const char *_uRL;                               ///< URL for the update
+    char _buffer[BLOCK_SIZE_P];                     ///< Buffer for reading/writing data blocks
+    const esp_partition_t *_newPartition;           ///< Pointer to the new partition for firmware update
+    bool _isFirmware = false;                       ///< Flag indicating whether the update is for firmware
+    char ca_cert[1339] =                            ///< Certificate data for secure communication
         "-----BEGIN CERTIFICATE-----\n"
         // (Certificate data goes here)
         "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\n"

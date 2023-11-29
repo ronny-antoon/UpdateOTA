@@ -7,11 +7,7 @@ UpdateOTA::UpdateOTA(MultiPrinterLoggerInterface *logger, RelayModuleInterface *
     Log_Debug(_logger, "UpdateOTA created");
     // Initialize member variables
     _newPartition = nullptr;
-    _isFirmware = false;
     _uRL = nullptr;
-    _httpCode = 0;
-    _wifiClientSecure = nullptr;
-    _httpClient = nullptr;
 }
 
 UpdateOTA::~UpdateOTA()
