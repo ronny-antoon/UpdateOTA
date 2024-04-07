@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "UpdateOTA.hpp"
+#include "MultiPrinterLogger.hpp"
 
 class UpdateOTATest : public ::testing::Test
 {
@@ -15,11 +16,15 @@ protected:
     const char *WIFI_SSID = "Wokwi-GUEST";
     const char *WIFI_PASSWORD = "";
     const int WIFI_CHANNEL = 6;
+    MultiPrinterLogger *logger = new MultiPrinterLogger();
+    logger->addPrinter(Serial);
+    logger->setLogLevel(MultiPrinterLoggerInterface::LogLevel::VERBOSE);
+    
 
     void SetUp() override
     {
         // Initialize UpdateOTA
-        _updateOTA = new UpdateOTA();
+        _updateOTA = new UpdateOTA(logger);
     }
 
     void TearDown() override
