@@ -2,9 +2,10 @@
 #define TEST_UPDATE_OTA_HPP
 
 #include <gtest/gtest.h>
-
 #include "UpdateOTA.hpp"
-#include "MultiPrinterLogger.hpp"
+#include "loggme.hpp"
+
+
 
 class UpdateOTATest : public ::testing::Test
 {
@@ -16,15 +17,11 @@ protected:
     const char *WIFI_SSID = "Wokwi-GUEST";
     const char *WIFI_PASSWORD = "";
     const int WIFI_CHANNEL = 6;
-    MultiPrinterLogger *logger = new MultiPrinterLogger();
-    logger->addPrinter(Serial);
-    logger->setLogLevel(MultiPrinterLoggerInterface::LogLevel::VERBOSE);
-    
 
     void SetUp() override
     {
         // Initialize UpdateOTA
-        _updateOTA = new UpdateOTA(logger);
+        _updateOTA = new UpdateOTA(logger12);
     }
 
     void TearDown() override
