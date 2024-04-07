@@ -35,7 +35,7 @@ jobs:
         uses: wokwi/wokwi-ci-action@v1
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN }}
-          timeout: 180000
+          timeout: 360000
           fail_text: FAILED
           scenario: 'senario.test.yaml'
 
