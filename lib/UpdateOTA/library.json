@@ -1,6 +1,6 @@
 {
     "name": "UpdateOTA",
-    "version": "7.0.1",
+    "version": "7.2.0",
     "description": "The UpdateOTA Library streamlines the implementation of Over-The-Air firmware updates for ESP8266-based projects. It introduces an abstract class, *UpdateOTAInterface*, defining methods for starting updates, retrieving version numbers, and handling update errors. The library is designed to work seamlessly with ESP8266, Arduino, and other related libraries.",
     "keywords": "UpdateOTA, OTA,over the air, update http, updater,arduino ota,firmware update,upload spiffs, ESP32, ronny, antoon, MetaHouse",
     "repository": {

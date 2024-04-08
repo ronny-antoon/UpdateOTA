@@ -109,18 +109,14 @@ UpdateOTAError UpdateOTA::getVersionNumber(const char *uRL, char *buffer, uint8_
         return UpdateOTAError::NO_INTERNET;
     }
 
-    Log_Verbose(_logger, "11111111111111111111111111111111111111111111111111111111111111111");
     // Set member variables based on input parameters
     _uRL = uRL;
     _wifiClientSecure = new WiFiClientSecure();
-    Log_Verbose(_logger, "11111111111111111111111111111111111111111111111111111111111111111");
     _httpClient = new HTTPClient();
-    Log_Verbose(_logger, "11111111111111111111111111111111111111111111111111111111111111111");
     UpdateOTAError err = UpdateOTAError::SUCCESS;
-Log_Verbose(_logger, "11111111111111111111111111111111111111111111111111111111111111111");
     // Process the GET request
     err = processGetRequest();
-    Log_Verbose(_logger, "11111111111111111111111111111111111111111111111111111111111111111");
+
     if (err != UpdateOTAError::SUCCESS)
     {
         Log_Error(_logger, "UpdateOTA getVersionNumber error: Failed to process GET request, ErrorCode=%d", err);
